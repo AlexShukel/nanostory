@@ -1,9 +1,5 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
+import { renderNanostory } from "./lib";
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-    <React.StrictMode>
-        <App stories={[]} />
-    </React.StrictMode>
-);
+renderNanostory({
+    stories: [],
+});

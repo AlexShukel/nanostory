@@ -3,5 +3,5 @@ export type ComponentProps = {
 };
 
 export const Component = ({ message }: ComponentProps) => {
-    return <p>{message}</p>;
+    return <p style={{ fontSize: 36 }}>{message}</p>;
 };
