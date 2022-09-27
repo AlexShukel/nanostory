@@ -24,7 +24,7 @@ export const MenuLink = styled("a", {
     variants: {
         variant: {
             selected: {
-                backgroundColor: "#319795",
+                backgroundColor: "$selected",
             },
         },
     },

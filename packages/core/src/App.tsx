@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { styled } from "./stitches.config";
 import { ReactComponent as LogoIcon } from "./assets/logo.svg";
-import "./App.css";
 import { Sidebar } from "./components/Sidebar";
 
 export type AppProps = {

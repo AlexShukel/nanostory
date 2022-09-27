@@ -1,6 +1,6 @@
 import { createStitches } from "@stitches/react";
 
-export const { styled } = createStitches({
+export const { styled, globalCss } = createStitches({
     theme: {
         space: {
             0.5: "0.125rem",
@@ -38,6 +38,7 @@ export const { styled } = createStitches({
         },
         colors: {
             "aside-background": "#F4F4F4",
+            selected: "rgba(49, 151, 149, 0.2)",
         },
         fontSizes: {
             xs: "0.75rem",
