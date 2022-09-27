@@ -32,6 +32,8 @@ importers:
 
   packages/core:
     specifiers:
+      '@nanostory/plugin': workspace:*
+      '@nanostory/react': workspace:*
       '@radix-ui/react-collapsible': ^1.0.0
       '@stitches/react': ^1.2.8
       '@types/react': ^18.0.17
@@ -49,6 +51,8 @@ importers:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     devDependencies:
+      '@nanostory/plugin': link:../plugin
+      '@nanostory/react': link:../react
       '@types/react': 18.0.21
       '@types/react-dom': 18.0.6
       '@vitejs/plugin-react': 2.1.0_vite@3.1.3

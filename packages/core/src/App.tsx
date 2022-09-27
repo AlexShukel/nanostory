@@ -22,7 +22,7 @@ const Logo = styled("div", {
     justifyContent: "flex-end",
     columnGap: "$3",
     padding: "0 $12",
-    backgroundColor: "$background",
+    backgroundColor: "$aside-background",
 });
 
 const AppTitle = styled("p", {
