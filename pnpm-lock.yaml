@@ -32,6 +32,7 @@ importers:
 
   packages/core:
     specifiers:
+      '@fontsource/poppins': ^4.5.9
       '@nanostory/plugin': workspace:*
       '@nanostory/react': workspace:*
       '@stitches/react': ^1.2.8
@@ -45,6 +46,7 @@ importers:
       vite-plugin-dts: ^1.5.0
       vite-plugin-svgr: ^2.2.1
     dependencies:
+      '@fontsource/poppins': 4.5.9
       '@stitches/react': 1.2.8_react@18.2.0
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
@@ -385,6 +387,10 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  /@fontsource/poppins/4.5.9:
+    resolution: {integrity: sha512-PMHOYeUpdmdN1xk13aGvhvZZrv9Zt3ubx2PmDvnROHgefm0ixpFd3ogAi0fY/aWtlkUdvgt0mSkGGbtt5i4MsQ==}
+    dev: false
 
   /@jridgewell/gen-mapping/0.1.1:
     resolution: {integrity: sha512-sQXCasFk+U8lWYEe66WxRDOE9PjVz4vSM51fTu3Hw+ClTpUSQb718772vH3pyS5pShp6lvQM7SxgIDXXXmOX7w==}

@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import { styled } from "./stitches.config";
 import { ReactComponent as LogoIcon } from "./assets/logo.svg";
 import { Sidebar } from "./components/Sidebar";
@@ -27,6 +26,7 @@ const Logo = styled("div", {
 const AppTitle = styled("p", {
     fontWeight: "bold",
     fontSize: "$2xl",
+    fontFamily: "Poppins, sans-serif",
 });
 
 const Header = styled("header", {});
