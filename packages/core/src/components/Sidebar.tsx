@@ -21,6 +21,7 @@ export const MenuLink = styled("a", {
     cursor: "pointer",
     borderRadius: "$lg",
     padding: "$2 $4",
+    fontFamily: "Poppins, sans-serif",
     variants: {
         variant: {
             selected: {

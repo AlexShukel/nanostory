@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { globalCss } from "./stitches.config";
+import "@fontsource/poppins";
 
 const globalStyles = globalCss({
     "body, html, #root": {

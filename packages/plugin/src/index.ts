@@ -38,7 +38,7 @@ const main = async () => {
 main();
 `;
 
-export default function myPlugin(): Plugin {
+export default function nanostoryPlugin(): Plugin {
     const entryFilename = "/nanostory-entry.tsx";
     const storyFilename = "/nanostory-story.tsx";
 
