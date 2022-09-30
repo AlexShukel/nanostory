@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { styled } from "../stitches.config";
+import { Link } from "react-router-dom";
 
 const Root = styled("aside", {
     display: "flex",
@@ -15,7 +15,7 @@ const Navigation = styled("nav", {
     width: "max-content",
 });
 
-export const MenuLink = styled("a", {
+export const MenuLink = styled(Link, {
     textAlign: "left",
     width: "100%",
     cursor: "pointer",
@@ -40,22 +40,22 @@ export type SideBarProps = {
 };
 
 export const Sidebar = ({ stories }: SideBarProps) => {
-    const [selectedIndex, setSelectedIndex] = useState(0);
-
     return (
         <Root>
             <Navigation>
-                {stories.map((story, index) => (
-                    <MenuLink
-                        onClick={() => {
-                            setSelectedIndex(index);
-                        }}
-                        variant={index === selectedIndex ? "selected" : undefined}
-                        key={index}
-                    >
-                        {getStoryName(story)}
-                    </MenuLink>
-                ))}
+                {stories.map((storyPath, index) => {
+                    const componentName = getStoryName(storyPath);
+
+                    return (
+                        <MenuLink
+                            // variant={index === selectedIndex ? "selected" : undefined}
+                            key={index}
+                            to={`__nanostory_iframe/${encodeURI("./" + storyPath)}`}
+                        >
+                            {componentName}
+                        </MenuLink>
+                    );
+                })}
             </Navigation>
         </Root>
     );

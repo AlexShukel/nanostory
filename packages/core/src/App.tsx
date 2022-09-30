@@ -1,6 +1,7 @@
 import { styled } from "./stitches.config";
 import { ReactComponent as LogoIcon } from "./assets/logo.svg";
 import { Sidebar } from "./components/Sidebar";
+import { Outlet } from "react-router-dom";
 
 export type AppProps = {
     stories: string[];
@@ -42,7 +43,9 @@ const App = ({ stories }: AppProps) => {
             </Logo>
             <Header>TODO</Header>
             <Sidebar stories={stories} />
-            <Content>TODO</Content>
+            <Content>
+                <Outlet />
+            </Content>
         </Root>
     );
 };
