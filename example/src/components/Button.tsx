@@ -6,5 +6,5 @@ export type ButtonProps = PropsWithChildren<{
 }>;
 
 export const Button = (props: ButtonProps) => {
-    return <button {...props} />;
+    return <button {...props}>Hello world</button>;
 };

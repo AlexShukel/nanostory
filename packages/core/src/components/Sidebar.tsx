@@ -1,5 +1,6 @@
 import { styled } from "../stitches.config";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { getStoryName, getStoryNameFromSplat } from "../pathUtils";
 
 const Root = styled("aside", {
     display: "flex",
@@ -22,6 +23,8 @@ export const MenuLink = styled(Link, {
     borderRadius: "$lg",
     padding: "$2 $4",
     fontFamily: "Poppins, sans-serif",
+    color: "$link",
+    textDecoration: "none",
     variants: {
         variant: {
             selected: {
@@ -31,15 +34,15 @@ export const MenuLink = styled(Link, {
     },
 });
 
-const getStoryName = (story: string) => {
-    return story.slice(story.lastIndexOf("/") + 1, story.lastIndexOf(".stories"));
-};
-
 export type SideBarProps = {
     stories: string[];
 };
 
 export const Sidebar = ({ stories }: SideBarProps) => {
+    const location = useLocation();
+
+    const currentComponentName = getStoryNameFromSplat(location.pathname);
+
     return (
         <Root>
             <Navigation>
@@ -48,9 +51,9 @@ export const Sidebar = ({ stories }: SideBarProps) => {
 
                     return (
                         <MenuLink
-                            // variant={index === selectedIndex ? "selected" : undefined}
+                            variant={currentComponentName === componentName ? "selected" : undefined}
                             key={index}
-                            to={`__nanostory_iframe/${encodeURI("./" + storyPath)}`}
+                            to={`components/${componentName}`}
                         >
                             {componentName}
                         </MenuLink>
