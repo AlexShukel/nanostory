@@ -1,6 +1,6 @@
 import { styled } from "../stitches.config";
 import { Link, useLocation } from "react-router-dom";
-import { getStoryName, getStoryNameFromSplat } from "../pathUtils";
+import { getStoryName } from "../pathUtils";
 
 const Root = styled("aside", {
     display: "flex",
@@ -41,8 +41,6 @@ export type SideBarProps = {
 export const Sidebar = ({ stories }: SideBarProps) => {
     const location = useLocation();
 
-    const currentComponentName = getStoryNameFromSplat(location.pathname);
-
     return (
         <Root>
             <Navigation>
@@ -51,9 +49,9 @@ export const Sidebar = ({ stories }: SideBarProps) => {
 
                     return (
                         <MenuLink
-                            variant={currentComponentName === componentName ? "selected" : undefined}
+                            variant={location.pathname === storyPath ? "selected" : undefined}
                             key={index}
-                            to={`components/${componentName}`}
+                            to={storyPath}
                         >
                             {componentName}
                         </MenuLink>

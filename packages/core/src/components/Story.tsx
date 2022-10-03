@@ -1,20 +1,14 @@
 import { useParams } from "react-router-dom";
-import { getStoryName, getStoryNameFromSplat } from "../pathUtils";
+import { NanostoryConfig } from "../lib";
 
-export type StoryProps = {
-    stories: Record<string, string>;
-};
-
-export const Story = ({ stories }: StoryProps) => {
+export const Story = ({ stories }: NanostoryConfig) => {
     const { "*": splat } = useParams();
 
     if (!splat) {
         return null;
     }
 
-    const storyName = getStoryNameFromSplat(splat);
-
-    const story = Object.entries(stories).find(([key]) => getStoryName(key) === storyName);
+    const story = Object.entries(stories).find(([storyPath]) => splat === storyPath);
 
     if (!story) {
         return null;

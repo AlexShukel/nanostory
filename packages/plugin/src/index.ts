@@ -1,24 +1,9 @@
 import { normalizePath, Plugin } from "vite";
 import glob from "fast-glob";
 import { resolve } from "path";
+import { htmlTemplate } from "./htmlTemplate";
 
-const storyHtmlTemplate = `
-<!DOCTYPE html>
-<html lang="en">
-    <head>  
-        <meta charset="UTF-8" />
-        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>nanostory</title>
-    </head>
-    <body>
-        <div id="root"></div>
-        <script type="module" src="{{ entry }}"></script>
-    </body>
-</html>
-`;
-
-const nanostoryEntry = `
+const entryPointScript = `
 import { renderNanostory } from "@nanostory/core";
 
 renderNanostory({
@@ -26,7 +11,7 @@ renderNanostory({
 });
 `;
 
-const nanostoryStory = `
+const singleStoryScript = `
 import * as variants from "{{ story }}";
 
 const main = async () => {
@@ -42,18 +27,15 @@ main();
 
 type NanostoryPluginConfig = {
     storyPattern?: string;
+    storyRoot?: string;
 };
 
-const getEntriesFromGlob = (pattern: string) => {
-    return glob(pattern, { cwd: process.cwd() });
-};
-
-const getStoryIframePath = (storyPath: string) => {
-    return "__nanostory_iframe/" + storyPath + ".html";
+const getStoryIframePath = (storyPath: string, buildMode: boolean) => {
+    return (buildMode ? "" : "/") + "__nanostory_iframe/" + storyPath + ".html";
 };
 
 const isStoryIframePath = (storyPath: string, buildMode: boolean) => {
-    return storyPath.startsWith((buildMode ? "/" : "") + "__nanostory_iframe");
+    return storyPath.startsWith((buildMode ? "" : "/") + "__nanostory_iframe");
 };
 
 const getStoryScriptPath = (storyPath: string, buildMode: boolean) => {
@@ -79,6 +61,7 @@ const getStoryNameFromIframePath = (iframePath: string) => {
 
 export default function nanostoryPlugin(config: NanostoryPluginConfig = {}): Plugin {
     const storyPattern = config.storyPattern ?? "**/*.(stories|story).{ts,tsx,js,jsx}";
+    const storyRoot = config.storyRoot ?? process.cwd();
     let buildMode = false;
 
     return {
@@ -86,22 +69,22 @@ export default function nanostoryPlugin(config: NanostoryPluginConfig = {}): Plu
         async config(config, env) {
             if (env.command === "build") {
                 buildMode = true;
+
+                if (config.build === undefined) {
+                    config.build = {};
+                }
+
+                if (config.build.rollupOptions === undefined) {
+                    config.build.rollupOptions = {};
+                }
+
+                const entries = await glob(storyPattern, { cwd: storyRoot });
+
+                config.build.rollupOptions.input = [
+                    resolve(process.cwd(), "index.html"),
+                    ...entries.map((entry) => getStoryIframePath(entry, buildMode)),
+                ];
             }
-
-            if (config.build === undefined) {
-                config.build = {};
-            }
-
-            if (config.build.rollupOptions === undefined) {
-                config.build.rollupOptions = {};
-            }
-
-            const entries = await getEntriesFromGlob(storyPattern);
-
-            config.build.rollupOptions.input = [
-                resolve(process.cwd(), "index.html"),
-                ...entries.map(getStoryIframePath),
-            ];
 
             config.appType = "mpa";
 
@@ -128,21 +111,21 @@ export default function nanostoryPlugin(config: NanostoryPluginConfig = {}): Plu
             const realModule = buildMode ? module.substring(1) : module;
 
             if (isStoryScriptPath(realModule, buildMode)) {
-                return nanostoryStory.replace(
+                return singleStoryScript.replace(
                     "{{ story }}",
                     normalizePath(getStoryPathFromScriptPath(realModule, buildMode))
                 );
             }
 
             if (module.includes("nanostory_entry.js")) {
-                const entries = await getEntriesFromGlob(storyPattern);
+                const entries = await glob(storyPattern, { cwd: storyRoot });
 
                 const stories = entries.reduce(
-                    (acc, entry) => acc + `'${entry}': '${getStoryIframePath(entry)}',\n`,
+                    (acc, entry) => acc + `'${entry}': '${getStoryIframePath(entry, buildMode)}',\n`,
                     ""
                 );
 
-                return nanostoryEntry.replace("{{ stories }}", `{\n${stories}\n}`);
+                return entryPointScript.replace("{{ stories }}", `{\n${stories}\n}`);
             }
         },
         configureServer: (server) => {
@@ -157,15 +140,14 @@ export default function nanostoryPlugin(config: NanostoryPluginConfig = {}): Plu
         transformIndexHtml: {
             enforce: "pre",
             transform: (_, ctx) => {
-                console.log(ctx.originalUrl);
                 if (isStoryIframePath(ctx.filename, buildMode)) {
-                    return storyHtmlTemplate.replace(
+                    return htmlTemplate.replace(
                         "{{ entry }}",
                         getStoryScriptPath(getStoryNameFromIframePath(ctx.filename), buildMode)
                     );
                 }
 
-                return storyHtmlTemplate.replace("{{ entry }}", (buildMode ? "virtual:" : "/") + "nanostory_entry.js");
+                return htmlTemplate.replace("{{ entry }}", (buildMode ? "virtual:" : "/") + "nanostory_entry.js");
             },
         },
     };
