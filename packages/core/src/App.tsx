@@ -1,6 +1,8 @@
 import { styled } from "./stitches.config";
 import { ReactComponent as LogoIcon } from "./assets/logo.svg";
 import { Sidebar } from "./components/Sidebar";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Story } from "./components/Story";
 
 export type AppProps = {
     stories: string[];
@@ -35,15 +37,21 @@ const Content = styled("main", {});
 
 const App = ({ stories }: AppProps) => {
     return (
-        <Root>
-            <Logo>
-                <LogoIcon />
-                <AppTitle>Nanostory</AppTitle>
-            </Logo>
-            <Header>TODO</Header>
-            <Sidebar stories={stories} />
-            <Content>TODO</Content>
-        </Root>
+        <BrowserRouter>
+            <Root>
+                <Logo>
+                    <LogoIcon />
+                    <AppTitle>Nanostory</AppTitle>
+                </Logo>
+                <Header>TODO</Header>
+                <Sidebar stories={stories} />
+                <Content>
+                    <Routes>
+                        <Route path="*" element={<Story stories={stories} />} />
+                    </Routes>
+                </Content>
+            </Root>
+        </BrowserRouter>
     );
 };
 

@@ -39,6 +39,7 @@ export const { styled, globalCss } = createStitches({
         colors: {
             "aside-background": "#F4F4F4",
             selected: "rgba(49, 151, 149, 0.2)",
+            link: "#1D4044",
         },
         fontSizes: {
             xs: "0.75rem",

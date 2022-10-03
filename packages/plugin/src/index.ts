@@ -28,7 +28,7 @@ renderNanostory({
 const nanostoryStory = `
 const main = async () => {
     const url = new URL(window.location.href);
-    const storyFile = await import(/* @vite-ignore */ url.searchParams.get('filename'));
+    const storyFile = await import(/* @vite-ignore */ url.searchParams.get('storyPath'));
     const story = storyFile[url.searchParams.get('variant') ?? 'default'];
 
     const rootDiv = document.getElementById('root');
@@ -46,7 +46,9 @@ export default function nanostoryPlugin(): Plugin {
         name: "transform-file",
         load: async (module) => {
             if (module === entryFilename) {
-                const entries = await glob("**/*.stories.tsx", { cwd: process.cwd() });
+                const entries = await (
+                    await glob("**/*.stories.tsx", { cwd: process.cwd() })
+                ).map((value) => `./${value}`);
 
                 return nanostoryEntry.replace("{{ stories }}", JSON.stringify(entries));
             }
