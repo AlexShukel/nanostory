@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { getStoryName, getStoryNameFromSplat } from "../pathUtils";
 
 export type StoryProps = {
-    stories: string[];
+    stories: Record<string, string>;
 };
 
 export const Story = ({ stories }: StoryProps) => {
@@ -14,11 +14,11 @@ export const Story = ({ stories }: StoryProps) => {
 
     const storyName = getStoryNameFromSplat(splat);
 
-    const story = stories.find((value) => getStoryName(value) === storyName);
+    const story = Object.entries(stories).find(([key]) => getStoryName(key) === storyName);
 
     if (!story) {
         return null;
     }
 
-    return <iframe src={`/__nanostory_iframe?storyPath=${encodeURIComponent(story)}`} />;
+    return <iframe src={`/${story[1]}`} />;
 };

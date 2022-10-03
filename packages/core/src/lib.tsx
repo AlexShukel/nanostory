@@ -13,7 +13,7 @@ const globalStyles = globalCss({
 });
 
 export type NanostoryConfig = {
-    stories: string[];
+    stories: Record<string, string>;
 };
 
 export const renderNanostory = ({ stories }: NanostoryConfig) => {

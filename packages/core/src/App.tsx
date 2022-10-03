@@ -3,10 +3,7 @@ import { ReactComponent as LogoIcon } from "./assets/logo.svg";
 import { Sidebar } from "./components/Sidebar";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Story } from "./components/Story";
-
-export type AppProps = {
-    stories: string[];
-};
+import { NanostoryConfig } from "./lib";
 
 const Root = styled("div", {
     width: "100%",
@@ -35,7 +32,7 @@ const Header = styled("header", {});
 
 const Content = styled("main", {});
 
-const App = ({ stories }: AppProps) => {
+const App = ({ stories }: NanostoryConfig) => {
     return (
         <BrowserRouter>
             <Root>
@@ -44,7 +41,7 @@ const App = ({ stories }: AppProps) => {
                     <AppTitle>Nanostory</AppTitle>
                 </Logo>
                 <Header>TODO</Header>
-                <Sidebar stories={stories} />
+                <Sidebar stories={Object.keys(stories)} />
                 <Content>
                     <Routes>
                         <Route path="*" element={<Story stories={stories} />} />
