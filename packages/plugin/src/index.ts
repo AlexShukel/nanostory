@@ -30,22 +30,6 @@ type NanostoryPluginConfig = {
     storyRoot?: string;
 };
 
-const getStoryIframePath = (storyPath: string, buildMode: boolean) => {
-    return (buildMode ? "" : "/") + "__nanostory_iframe/" + storyPath + ".html";
-};
-
-const isStoryIframePath = (storyPath: string, buildMode: boolean) => {
-    return storyPath.startsWith((buildMode ? "" : "/") + "__nanostory_iframe");
-};
-
-const getStoryScriptPath = (storyPath: string, buildMode: boolean) => {
-    return (buildMode ? "virtual:" : "/") + "__nanostory_script/" + storyPath + ".js";
-};
-
-const isStoryScriptPath = (storyPath: string, buildMode: boolean) => {
-    return storyPath.startsWith((buildMode ? "virtual:" : "/") + "__nanostory_script");
-};
-
 const getStoryPathFromScriptPath = (scriptPath: string, buildMode: boolean) => {
     return resolve(
         process.cwd(),
@@ -55,21 +39,61 @@ const getStoryPathFromScriptPath = (scriptPath: string, buildMode: boolean) => {
     );
 };
 
-const getStoryNameFromIframePath = (iframePath: string) => {
-    return iframePath.substring(0, iframePath.length - ".html".length).substring("__nanostory_iframe/".length);
+const getStoryNameFromIframePath = (iframePath: string, buildMode: boolean) => {
+    return iframePath
+        .substring(0, iframePath.length - ".html".length)
+        .substring(`${buildMode ? "" : "/"}__nanostory_iframe/`.length);
+};
+
+type PathModifierConfig = {
+    prefix: string;
+    extension: string;
+    buildPrefix?: string;
+    isBuildMode: boolean;
+};
+
+type PathModifier = {
+    get: (storyPath: string) => string;
+    is: (storyPath: string) => boolean;
+};
+
+const createPathModifier = ({ prefix, extension, isBuildMode, buildPrefix = "" }: PathModifierConfig): PathModifier => {
+    const fullPrefix = (isBuildMode ? buildPrefix : "/") + prefix;
+
+    return {
+        get: (storyPath) => fullPrefix + `/${storyPath}.${extension}`,
+        is: (storyPath) => {
+            return storyPath.startsWith(fullPrefix);
+        },
+    };
 };
 
 export default function nanostoryPlugin(config: NanostoryPluginConfig = {}): Plugin {
     const storyPattern = config.storyPattern ?? "**/*.(stories|story).{ts,tsx,js,jsx}";
     const storyRoot = config.storyRoot ?? process.cwd();
-    let buildMode = false;
+    let iframePath: PathModifier;
+    let scriptPath: PathModifier;
+    let isBuildMode = false;
 
     return {
         name: "nanostory",
         async config(config, env) {
-            if (env.command === "build") {
-                buildMode = true;
+            isBuildMode = env.command === "build";
 
+            iframePath = createPathModifier({
+                isBuildMode,
+                extension: "html",
+                prefix: "__nanostory_iframe",
+            });
+
+            scriptPath = createPathModifier({
+                isBuildMode,
+                extension: "js",
+                prefix: "__nanostory_script",
+                buildPrefix: "virtual:",
+            });
+
+            if (isBuildMode) {
                 if (config.build === undefined) {
                     config.build = {};
                 }
@@ -82,48 +106,45 @@ export default function nanostoryPlugin(config: NanostoryPluginConfig = {}): Plu
 
                 config.build.rollupOptions.input = [
                     resolve(process.cwd(), "index.html"),
-                    ...entries.map((entry) => getStoryIframePath(entry, buildMode)),
+                    ...entries.map((entry) => iframePath.get(entry)),
                 ];
-            }
 
-            config.appType = "mpa";
+                config.appType = "mpa";
+            }
 
             return config;
         },
         resolveId(module) {
-            if (isStoryScriptPath(module, buildMode)) {
+            if (scriptPath.is(module)) {
                 return "\0" + module;
             }
 
-            if (isStoryIframePath(module, buildMode)) {
+            if (iframePath.is(module)) {
                 return module;
             }
 
             if (module.includes("nanostory_entry.js")) {
-                return (buildMode ? "\0" : "") + module;
+                return (isBuildMode ? "\0" : "") + module;
             }
         },
         async load(module) {
-            if (isStoryIframePath(module, buildMode)) {
+            if (iframePath.is(module)) {
                 return "";
             }
 
-            const realModule = buildMode ? module.substring(1) : module;
+            const realModule = module.substring(1);
 
-            if (isStoryScriptPath(realModule, buildMode)) {
+            if (scriptPath.is(realModule)) {
                 return singleStoryScript.replace(
                     "{{ story }}",
-                    normalizePath(getStoryPathFromScriptPath(realModule, buildMode))
+                    normalizePath(getStoryPathFromScriptPath(realModule, isBuildMode))
                 );
             }
 
             if (module.includes("nanostory_entry.js")) {
                 const entries = await glob(storyPattern, { cwd: storyRoot });
 
-                const stories = entries.reduce(
-                    (acc, entry) => acc + `'${entry}': '${getStoryIframePath(entry, buildMode)}',\n`,
-                    ""
-                );
+                const stories = entries.reduce((acc, entry) => acc + `'${entry}': '${iframePath.get(entry)}',\n`, "");
 
                 return entryPointScript.replace("{{ stories }}", `{\n${stories}\n}`);
             }
@@ -140,14 +161,21 @@ export default function nanostoryPlugin(config: NanostoryPluginConfig = {}): Plu
         transformIndexHtml: {
             enforce: "pre",
             transform: (_, ctx) => {
-                if (isStoryIframePath(ctx.filename, buildMode)) {
+                if (ctx.originalUrl?.startsWith("/__nanostory_iframe")) {
                     return htmlTemplate.replace(
                         "{{ entry }}",
-                        getStoryScriptPath(getStoryNameFromIframePath(ctx.filename), buildMode)
+                        scriptPath.get(getStoryNameFromIframePath(ctx.originalUrl, isBuildMode))
                     );
                 }
 
-                return htmlTemplate.replace("{{ entry }}", (buildMode ? "virtual:" : "/") + "nanostory_entry.js");
+                if (iframePath.is(ctx.filename)) {
+                    return htmlTemplate.replace(
+                        "{{ entry }}",
+                        scriptPath.get(getStoryNameFromIframePath(ctx.filename, isBuildMode))
+                    );
+                }
+
+                return htmlTemplate.replace("{{ entry }}", (isBuildMode ? "virtual:" : "/") + "nanostory_entry.js");
             },
         },
     };

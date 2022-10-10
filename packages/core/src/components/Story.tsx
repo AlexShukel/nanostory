@@ -14,5 +14,5 @@ export const Story = ({ stories }: NanostoryConfig) => {
         return null;
     }
 
-    return <iframe src={`/${story[1]}`} />;
+    return <iframe src={story[1].startsWith("/") ? story[1] : `/${story[1]}`} />;
 };
